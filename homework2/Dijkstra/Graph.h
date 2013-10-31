@@ -19,8 +19,8 @@ public:
     // Clients shouldn't instantiate edges directly (but rather thru Nodes)
     Edge(Node *u, Node *v, int cost): u(u), v(v), cost(cost) {};
 
-    Node *get_v() { return v; }
     Node *get_u() { return u; }
+    Node *get_v() { return v; }
     int get_cost() { return cost; }
 };
 
@@ -37,6 +37,16 @@ public:
     {
         Edge new_edge(this, v, cost);
         edges.push_back(new_edge);
+    }
+    bool is_edge(int id)
+    {
+        for (unsigned int i = 0; i < edges.size(); i++) {
+            if (id == edges[i].get_v()->get_id()) {
+                return true;
+            }
+        }
+
+        return false;
     }
     void display_edges()
     {
@@ -63,6 +73,20 @@ public:
           int min_edge_cost, int max_edge_cost)
     {
 
+        // add all the nodes
+        for (unsigned int i = 0; i < num_nodes; i++) {
+            Node n(i);
+
+            add_node(&n);
+        }
+
+        // add the edges to the nodes
+        for (unsigned int i = 0; i < num_nodes; i++) {
+            for (unsigned int j = i + 1; j < num_nodes; j++) {
+                // if edge not existent already, then run random density?
+                // TODO
+            }
+        }
     }
 
     void add_node(Node *n)
