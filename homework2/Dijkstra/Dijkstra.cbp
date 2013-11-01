@@ -13,6 +13,7 @@
 				<Option compiler="cygwin" />
 				<Compiler>
 					<Add option="-g" />
+					<Add directory="../Dijkstra" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
@@ -28,6 +29,9 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="Graph.cpp" />
+		<Unit filename="Graph.h" />
+		<Unit filename="test_graph.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

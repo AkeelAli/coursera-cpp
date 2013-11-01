@@ -52,7 +52,7 @@ public:
     {
         for (unsigned int i = 0; i < edges.size(); i++) {
             Edge edge = edges[i];
-            cout << id << " - " << edge.get_v()->get_id() << endl;
+            cout << id << " - " << edge.get_v()->get_id() << " (" << edge.get_cost() << ") " << endl;
         }
     }
 };
@@ -65,26 +65,43 @@ public:
     Graph() {};
     ~Graph()
     {
-        //free
+        // TODO does clear take care of deleting?
+        for (unsigned int i = 0; i < nodes.size(); i++) {
+            delete(nodes[i]);
+        }
+        nodes.clear();
     }
 
+    /* TODO does distance have to be float, i.e. could be any rational number in range?? */
     // assumption is that input is sane and correct
-    Graph(unsigned int num_nodes, unsigned int density,
+    Graph(unsigned int num_nodes, float density,
           int min_edge_cost, int max_edge_cost)
     {
 
         // add all the nodes
         for (unsigned int i = 0; i < num_nodes; i++) {
-            Node n(i);
+            Node *n = new Node(i);
 
-            add_node(&n);
+            add_node(n);
         }
 
         // add the edges to the nodes
         for (unsigned int i = 0; i < num_nodes; i++) {
             for (unsigned int j = i + 1; j < num_nodes; j++) {
-                // if edge not existent already, then run random density?
-                // TODO
+                float chance;
+                srand (time(NULL));
+                chance = rand() * 1.0 / RAND_MAX; // RAND_MAX is the max value returned by rand()
+
+                if (chance < density) {
+                    //re-seed
+                    srand(time(NULL));
+                    // rand_cost = [min_edge_cost,max_edge_cost] inclusive
+                    // TODO why is it always giving constant??
+                    float rand_cost = rand() % (max_edge_cost + 1 - min_edge_cost) + min_edge_cost;
+
+                    nodes[i]->add_edge(nodes[j], rand_cost);
+                    nodes[j]->add_edge(nodes[i], rand_cost);
+                }
             }
         }
     }
@@ -93,5 +110,25 @@ public:
     {
         nodes.push_back(n);
     }
+
+    void display_nodes()
+    {
+        for (unsigned int i = 0; i < nodes.size(); i++) {
+            cout << nodes[i]->get_id() << endl;
+            nodes[i]->display_edges();
+        }
+    }
+
+/*
+    Node *get_node(id)
+    {
+        for (unsigned int i = 0; i < nodes.size(); i++) {
+            if (nodes[i].get_id() == id) {
+                return &nodes[i];
+            }
+        }
+        return 0;
+    }
+*/
 };
 #endif // GRAPH_H
