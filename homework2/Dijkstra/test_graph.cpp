@@ -15,7 +15,7 @@ int main(void) {
     u.display_edges();
  */
 
-    Graph g(10, 0.2, 5, 10);
+    Graph g(10, 0.2, 1.0, 10.0);
 
     g.display_nodes();
 

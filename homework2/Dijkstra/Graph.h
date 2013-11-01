@@ -13,15 +13,15 @@ class Edge {
 private:
     Node *u;
     Node *v;
-    int cost;
+    double cost;
 
 public:
     // Clients shouldn't instantiate edges directly (but rather thru Nodes)
-    Edge(Node *u, Node *v, int cost): u(u), v(v), cost(cost) {};
+    Edge(Node *u, Node *v, double cost): u(u), v(v), cost(cost) {};
 
     Node *get_u() { return u; }
     Node *get_v() { return v; }
-    int get_cost() { return cost; }
+    double get_cost() { return cost; }
 };
 
 class Node {
@@ -33,7 +33,7 @@ public:
     Node(int id): id(id) {};
     ~Node() { edges.clear(); }
     int get_id() { return id; }
-    void add_edge(Node *v, int cost)
+    void add_edge(Node *v, double cost)
     {
         Edge new_edge(this, v, cost);
         edges.push_back(new_edge);
@@ -72,11 +72,15 @@ public:
         nodes.clear();
     }
 
-    /* TODO does distance have to be float, i.e. could be any rational number in range?? */
+    /* TODO does distance have to be double, i.e. could be any rational number in range?? */
     // assumption is that input is sane and correct
-    Graph(unsigned int num_nodes, float density,
-          int min_edge_cost, int max_edge_cost)
+    Graph(unsigned int num_nodes, double density,
+          double min_edge_cost, double max_edge_cost)
     {
+        double chance;
+        double rand_cost;
+        // seed
+        srand (time(0));
 
         // add all the nodes
         for (unsigned int i = 0; i < num_nodes; i++) {
@@ -88,16 +92,10 @@ public:
         // add the edges to the nodes
         for (unsigned int i = 0; i < num_nodes; i++) {
             for (unsigned int j = i + 1; j < num_nodes; j++) {
-                float chance;
-                srand (time(NULL));
                 chance = rand() * 1.0 / RAND_MAX; // RAND_MAX is the max value returned by rand()
 
                 if (chance < density) {
-                    //re-seed
-                    srand(time(NULL));
-                    // rand_cost = [min_edge_cost,max_edge_cost] inclusive
-                    // TODO why is it always giving constant??
-                    float rand_cost = rand() % (max_edge_cost + 1 - min_edge_cost) + min_edge_cost;
+                    rand_cost = (rand() * 1.0 * (max_edge_cost - min_edge_cost) )/RAND_MAX + min_edge_cost;
 
                     nodes[i]->add_edge(nodes[j], rand_cost);
                     nodes[j]->add_edge(nodes[i], rand_cost);
