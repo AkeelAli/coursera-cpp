@@ -85,11 +85,15 @@ public:
     ~Graph()
     {
         // TODO does clear take care of deleting?
+        /*
         for (unsigned int i = 0; i < nodes.size(); i++) {
             delete(nodes[i]);
         }
+        */
         nodes.clear();
     }
+
+    Graph(vector<Node *> nodes): nodes(nodes) {}
 
     /* TODO does distance have to be double, i.e. could be any rational number in range?? */
     // assumption is that input is sane and correct
