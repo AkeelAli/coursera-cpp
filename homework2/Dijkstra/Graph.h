@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iostream>
+#include <queue>
 
 using namespace std;
 
@@ -27,10 +28,13 @@ public:
 class Node {
 private:
     int id;
+    // TODO change these to pointers to edges
     vector<Edge> edges; // outgoing edges
 
+    double distance;
+
 public:
-    Node(int id): id(id) {};
+    Node(int id): id(id) { distance = 0;};
     ~Node() { edges.clear(); }
     int get_id() { return id; }
     void add_edge(Node *v, double cost)
@@ -55,6 +59,21 @@ public:
             cout << id << " - " << edge.get_v()->get_id() << " (" << edge.get_cost() << ") " << endl;
         }
     }
+
+    void set_distance(double distance)
+    {
+        this->distance = distance;
+    }
+
+    double get_distance()
+    {
+        return distance;
+    }
+
+    vector<Edge> get_edges()
+    {
+        return edges;
+    }
 };
 
 class Graph {
@@ -62,7 +81,7 @@ private:
     vector<Node *> nodes;
 
 public:
-    Graph() {};
+    Graph() {}
     ~Graph()
     {
         // TODO does clear take care of deleting?
@@ -117,16 +136,124 @@ public:
         }
     }
 
-/*
-    Node *get_node(id)
+    // TODO untested!
+    Node *get_node(int id)
     {
         for (unsigned int i = 0; i < nodes.size(); i++) {
-            if (nodes[i].get_id() == id) {
-                return &nodes[i];
+            if (nodes[i]->get_id() == id) {
+                return nodes[i];
             }
         }
         return 0;
     }
-*/
+
+    // TODO for now, return all nodes (not good practice)
+    vector<Node *> get_nodes()
+    {
+        return nodes;
+    }
+
+    bool contains(int id)
+    {
+        for (unsigned int i = 0; i < nodes.size(); i++) {
+            if (nodes[i]->get_id() == id) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    unsigned int num_nodes()
+    {
+        return nodes.size();
+    }
+
+};
+
+const double INFINITY = 99999999;
+
+class ShortestPath
+{
+private:
+    //priority_queue<Node *,vector<Node *>, greater_dist > open_set;
+    vector<int> open_set;
+    vector<int> closed_set;
+    Graph *g;
+
+    int pop_min()
+    {
+        double minimum = INFINITY;
+        int min_node = 0;
+        int idx_remove = 0;
+
+        for (unsigned int i = 0; i < open_set.size(); i++)
+        {
+            Node *n = g->get_node(open_set[i]);
+
+            if (n->get_distance() < minimum) {
+                min_node = open_set[i];
+                idx_remove = i;
+            }
+        }
+
+        // remove it
+        open_set.erase(open_set.begin() + idx_remove);
+
+        return min_node;
+    }
+public:
+    ShortestPath(Graph *g): g(g) {}
+
+    double path_size(int src, int dst)
+    {
+        if (!g->contains(src) || !g->contains(dst))
+            return -1;
+
+        vector<Node *> nodes = g->get_nodes();
+
+        closed_set.push_back(src);
+
+        g->get_node(src)->set_distance(0.0);
+        for (unsigned int i = 0; i < nodes.size(); i++)
+        {
+            nodes[i]->set_distance(INFINITY);
+        }
+
+        int latest_added_id = src;
+        Node *latest_added = g->get_node(latest_added_id);
+
+        while (latest_added_id != dst &&
+               closed_set.size() == g->num_nodes()) {
+            // relaxation step
+            vector<Edge> edges = latest_added->get_edges();
+            double starting_distance = latest_added->get_distance();
+
+            for (unsigned int i = 0; i < edges.size(); i++)
+            {
+                Node *v = edges[i].get_v();
+                double current_distance = v->get_distance();
+                double cost = edges[i].get_cost();
+
+                double new_distance = starting_distance + cost;
+
+                if (new_distance < current_distance)
+                    v->set_distance(new_distance);
+
+                open_set.push_back(v->get_id());
+            }
+
+            // add smallest in open_set to closed_set
+            latest_added_id = pop_min();
+            closed_set.push_back(latest_added_id);
+            latest_added = g->get_node(latest_added_id);
+        }
+
+        if (latest_added_id == dst) {
+            return latest_added->get_distance();
+        } else {
+            return -1;
+        }
+    }
 };
 #endif // GRAPH_H
