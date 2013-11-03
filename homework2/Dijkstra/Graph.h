@@ -182,14 +182,28 @@ class ShortestPath
 private:
     //priority_queue<Node *,vector<Node *>, greater_dist > open_set;
     vector<int> open_set;
+    // instead of marking nodes as visited, we use a closed_set
     vector<int> closed_set;
     Graph *g;
+
+    void display_set(vector<int> vector_set)
+    {
+        for (unsigned int i = 0; i < vector_set.size(); i++)
+        {
+            Node *n = g->get_node(vector_set[i]);
+            cout << vector_set[i] << " (" << n->get_distance() << ") ";
+        }
+        cout << endl;
+    }
 
     int pop_min()
     {
         double minimum = INFINITY;
         int min_node = 0;
         int idx_remove = 0;
+
+        //cout << "Open set before pop: ";
+        //display_set(open_set);
 
         for (unsigned int i = 0; i < open_set.size(); i++)
         {
@@ -198,11 +212,15 @@ private:
             if (n->get_distance() < minimum) {
                 min_node = open_set[i];
                 idx_remove = i;
+                minimum = n->get_distance();
             }
         }
 
         // remove it
         open_set.erase(open_set.begin() + idx_remove);
+
+        //cout << "Open set after pop: ";
+        //display_set(open_set);
 
         return min_node;
     }
@@ -216,19 +234,30 @@ public:
 
         vector<Node *> nodes = g->get_nodes();
 
-        closed_set.push_back(src);
-
-        g->get_node(src)->set_distance(0.0);
+        // init distances to infinity
         for (unsigned int i = 0; i < nodes.size(); i++)
         {
             nodes[i]->set_distance(INFINITY);
         }
+        // set src distance to 0 & add to open_set
+        g->get_node(src)->set_distance(0.0);
+        open_set.push_back(src);
 
         int latest_added_id = src;
         Node *latest_added = g->get_node(latest_added_id);
 
-        while (latest_added_id != dst &&
-               closed_set.size() == g->num_nodes()) {
+        while (latest_added_id != dst && closed_set.size() < g->num_nodes()) {
+
+            // add smallest in open_set to closed_set
+            latest_added_id = pop_min();
+            latest_added = g->get_node(latest_added_id);
+            if (!latest_added) {
+                cout << "Can't find node (" << latest_added_id << ") in graph " << endl;
+                return -1;
+            }
+            //cout << "\n    Adding node " << latest_added_id << " to closed set" << endl;
+            closed_set.push_back(latest_added_id);
+
             // relaxation step
             vector<Edge> edges = latest_added->get_edges();
             double starting_distance = latest_added->get_distance();
@@ -247,16 +276,16 @@ public:
                 open_set.push_back(v->get_id());
             }
 
-            // add smallest in open_set to closed_set
-            latest_added_id = pop_min();
-            closed_set.push_back(latest_added_id);
-            latest_added = g->get_node(latest_added_id);
+
         }
 
-        if (latest_added_id == dst) {
-            return latest_added->get_distance();
-        } else {
+        Node *dst_node = g->get_node(dst);
+
+        if (dst_node->get_distance() == INFINITY) {
+            cout << "dst unreachable from src!" << endl;
             return -1;
+        } else {
+            return dst_node->get_distance();
         }
     }
 };
