@@ -2,6 +2,8 @@
 
 #include <queue>
 
+//Removed in favor of monte_carlo.cpp
+#if 0
 int main(void) {
 
 /*
@@ -66,33 +68,7 @@ int main(void) {
     cout << "Computed average: " << sum << " / " << num_paths  << " = " << average << endl;
 */
 
-const int NUM_TESTS = 1000;
-const int NUM_NODES = 50;
-const double DENSITY = 0.2;
-const double MIN_EDGE_COST = 1.0;
-const double MAX_EDGE_COST = 10.0;
-
-double sum_average_shortest_path = 0;
-
-
-    // seed once at the beginning
-    srand (time(0));
-
-    for (int i = 0; i < NUM_TESTS; i++) {
-        double average = 0;
-
-        Graph g(NUM_NODES, DENSITY, MIN_EDGE_COST, MAX_EDGE_COST);
-
-        ShortestPath s(&g);
-
-        average = s.path_size(1, NUM_NODES, true);
-
-        sum_average_shortest_path += average;
-
-        //cout << average << endl;
-    }
-
-    cout << "average average = " << sum_average_shortest_path / NUM_TESTS << endl;
 
     return 0;
 }
+#endif
